@@ -1,0 +1,65 @@
+foa_id,title,agency,open_date,close_date,eligibility_text,program_description,award_range,source_url,tags
+50e87de4fa53e2afb42fad7bdc0586de,Mathematical Foundations of Artificial Intelligence,"U.S. National Science Foundation
+Assistance Listings:
+47.075
+--
+Social, Behavioral, and Economic Sciences
+47.049
+--
+Mathematical and Physical Sciences
+47.041
+--
+Engineering
+47.070
+--
+Computer and Information Science and Engineering
+Last Updated:
+October 19, 2025
+View version history on Grants.gov
+Description
+Machine Learning and Artificial Intelligence (AI) are enabling extraordinary scientific breakthroughs in fields ranging from protein folding, natural language processing, drug synthesis, and recommender
+systems to the discovery of novel engineering materials and products. These achievements lie at the confluence of mathematics, statistics, engineering and computer science, yet a clear explanation of the remarkable power and also the limitations of such AI systems has...
+eluded scientists from all disciplines. Critical foundational gaps remain that, if not properly addressed, will soon limit advances in machine learning, curbing progress in artificial intelligence. It appears increasingly unlikely that these critical gaps can be surmounted with increased computational power and experimentation alone. Deeper mathematical understanding is essential to ensuring that AI can be harnessed to meet the future needs of society and enable broad scientific discovery, while forestalling the unintended consequences of a disruptive technology.",2024-05-02T00:00:00,2026-11-08T00:00:00,"Eligible applicants
+Miscellaneous
+Other
+Additional information
+*Who May Submit Proposals: Proposals may only be submitted by the following:
+  -Non-profit, non-academic organizations: Independent museums, observatories, research laboratories, professional societies and similar organizations located in the U.S. that are directly associated with educational or research activities.
+  -
+Institutions of Higher Education (IHEs) - Two- and four-year IHEs (including community colleges) accredited in, and having a campus located in the US, acting on behalf of their faculty members.
+*Who May Serve as PI:
+As of the date the proposal is
+submitted
+, any PI, co-PI, or senior/key personnel must hold either:
+a tenured or tenure-track position,
+or
+a primary, full-time, paid appointment in a research or teaching position
+at a US-based campus of an organization eligible to
+submit
+to this solicitation (see above), with exceptions granted for family or medical leave, as
+determined
+by the
+submitting
+organization. Individuals with
+primary
+appointments at for-profit non-academic organizations or at overseas branch campuses of U.S. institutions of higher education are not eligible.","Machine Learning and Artificial Intelligence (AI) are enabling extraordinary scientific breakthroughs in fields ranging from protein folding, natural language processing, drug synthesis, and recommender
+systems to the discovery of novel engineering materials and products. These achievements lie at the confluence of mathematics, statistics, engineering and computer science, yet a clear explanation of the remarkable power and also the limitations of such AI systems has...
+eluded scientists from all disciplines. Critical foundational gaps remain that, if not properly addressed, will soon limit advances in machine learning, curbing progress in artificial intelligence. It appears increasingly unlikely that these critical gaps can be surmounted with increased computational power and experimentation alone. Deeper mathematical understanding is essential to ensuring that AI can be harnessed to meet the future needs of society and enable broad scientific discovery, while forestalling the unintended consequences of a disruptive technology.
+
+
+The National Science Foundation Directorates for Mathematical and Physical Sciences (MPS), Computer and Information Science and Engineering (CISE), Engineering (ENG), and Social, Behavioral and Economic Sciences (SBE) will jointly sponsor research collaborations consisting of mathematicians, statisticians, computer scientists, engineers, and social and behavioral scientists focused on the mathematical and theoretical foundations of AI. Research activities should focus on the most challenging mathematical and theoretical questions aimed at understanding the capabilities, limitations, and emerging properties of AI methods as well as the development of novel, and mathematically grounded, design and analysis principles for the current and next generation of AI approaches.
+Specific research goals include: establishing a fundamental mathematical understanding of the
+factors determining the
+capabilities and limitations of
+current
+and emerging
+generation
+s
+of
+AI systems,
+including, but not limited to, foundation models, generative models, deep learning, statistical learning, federated learning, and other evolving paradigms; the development of mathematically grounded design and analysis principles for the current and next generations of AI systems; rigorous approaches for characterizing and validating machine learning algorithms and their predictions; research enabling provably reliable, translational, general-purpose AI systems and algorithms; e
+ncouragement of new collaborations
+in this interdisciplinary research community and between institution
+s.
+The overall goal is to establish innovative and principled design and analysis approaches for AI technology using creative yet theoretically grounded mathematical and statistical frameworks, yielding explainable and interpretable models that can enable sustainable, socially responsible, and trustworthy AI.
+Show full description","$500,000-$1,500,000",https://simpler.grants.gov/opportunity/508e8ee7-6925-4593-a548-66578974572f,"['artificial-intelligence', 'deep-learning', 'explainable-ai', 'federated-learning', 'foundation-models', 'generative-models', 'interdisciplinary-research', 'machine-learning', 'mathematical-foundations', 'trustworthy-ai']"
