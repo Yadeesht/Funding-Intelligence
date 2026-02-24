@@ -35,7 +35,6 @@ def extract_with_regex(pattern, text):
 def extract_feids(text: str, url: str) -> dict:
     soup = BeautifulSoup(text, "html.parser")
     full_text = soup.get_text(separator="\n", strip=True)
-    print(full_text)
 
     title = extract_with_regex(r"Opportunity Listing - (.*?)\n", full_text)
 
@@ -133,8 +132,8 @@ def main():
     feids_with_tags = tags(feids)
 
     df = pd.DataFrame([feids_with_tags])
-    df.to_csv(f"{args.out_dir}/foa_data.csv", index=False)
-    json.dump(feids_with_tags, open(f"{args.out_dir}/foa_data.json", "w"), indent=4)
+    df.to_csv(f"{args.out_dir}/foa.csv", index=False)
+    json.dump(feids_with_tags, open(f"{args.out_dir}/foa.json", "w"), indent=4)
 
 
 if __name__ == "__main__":
