@@ -12,46 +12,6 @@ An open-source pipeline that automatically ingests Funding Opportunity Announcem
 - **Evaluation framework** — 20-record gold dataset with precision/recall/F1 metrics
 - **Modular architecture** — Each component is pluggable; new sources/taggers/ontologies plug in easily
 
-## Project Structure
-
-```
-Text-Processing/
-├── foa_pipeline/
-│   ├── __init__.py
-│   ├── schema/                   # Canonical FOA schema (single source of truth)
-│   │   ├── __init__.py
-│   │   └── foa_schema.py
-│   ├── ingestion/                # Source adapters
-│   │   ├── __init__.py
-│   │   ├── base_ingestor.py      # Abstract base class
-│   │   ├── grants_gov.py         # Grants.gov adapter
-│   │   └── nsf.py                # NSF adapter
-│   ├── extraction/               # Text extraction utilities
-│   │   ├── __init__.py
-│   │   ├── field_extractors.py   # Regex + text cleaning
-│   │   ├── date_parser.py        # Robust date parsing → ISO 8601
-│   │   └── award_parser.py       # Monetary amount parsing
-│   ├── ontology/                 # Controlled vocabularies
-│   │   ├── __init__.py
-│   │   └── vocabularies.py       # 4 taxonomy dimensions
-│   ├── tagging/                  # Semantic tagging engine
-│   │   ├── __init__.py
-│   │   ├── rule_based.py         # Layer 1: keyword matching
-│   │   └── embedding_tagger.py   # Layer 2: sentence-transformer similarity
-│   ├── storage/                  # Export modules
-│   │   ├── __init__.py
-│   │   ├── json_export.py        # JSON export with merge support
-│   │   └── csv_export.py         # Flat CSV export
-│   └── evaluation/               # Evaluation framework
-│       ├── __init__.py
-│       ├── gold_dataset.json     # 20 annotated FOAs
-│       └── evaluate.py           # Precision / Recall / F1
-├── run_pipeline.py               # Main CLI entry point
-├── main.py                       # Original prototype (kept for reference)
-├── requirements.txt
-└── README.md
-```
-
 ## Quick Start
 
 ### 1. Install dependencies
