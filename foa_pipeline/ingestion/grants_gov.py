@@ -54,10 +54,7 @@ class GrantsGovIngestor(BaseIngestor):
             }
         )
 
-    # ------------------------------------------------------------------
     # Public interface
-    # ------------------------------------------------------------------
-
     def search(self, query: str, limit: int = 25) -> List[FOARecord]:
         """Search Grants.gov for opportunities matching a query.
 
@@ -94,7 +91,6 @@ class GrantsGovIngestor(BaseIngestor):
 
     def fetch_single(self, url_or_id: str) -> Optional[FOARecord]:
         """Fetch a single FOA from its simpler.grants.gov page URL or opportunity ID."""
-        # If it looks like a UUID/ID, build the URL
         if not url_or_id.startswith("http"):
             url = f"{OPPORTUNITY_PAGE_BASE}/{url_or_id}"
         else:
@@ -161,10 +157,6 @@ class GrantsGovIngestor(BaseIngestor):
 
         self.logger.info("Batch ingestion retrieved %d records", len(all_records))
         return self.validate_records(all_records)
-
-    # ------------------------------------------------------------------
-    # Internals
-    # ------------------------------------------------------------------
 
     def _api_result_to_record(self, opp: dict) -> Optional[FOARecord]:
         """Convert an API search result dict into an FOARecord."""

@@ -73,11 +73,9 @@ class FOARecord:
         return hashlib.sha256(text.encode()).hexdigest()[:16]
 
     def to_dict(self) -> dict:
-        """Convert to a plain dictionary."""
         return asdict(self)
 
     def to_json(self, indent: int = 2) -> str:
-        """Serialize to JSON string."""
         return json.dumps(self.to_dict(), indent=indent, default=str)
 
     @classmethod
@@ -103,7 +101,6 @@ class FOARecord:
             issues.append("Missing source")
         if not self.source_url:
             issues.append("Missing source_url")
-        # Validate date formats
         for date_field, date_val in [
             ("open_date", self.open_date),
             ("close_date", self.close_date),
@@ -113,7 +110,6 @@ class FOARecord:
                     datetime.fromisoformat(date_val)
                 except ValueError:
                     issues.append(f"Invalid {date_field} format: {date_val}")
-        # Validate award range
         if self.award_min is not None and self.award_max is not None:
             if self.award_min > self.award_max:
                 issues.append("award_min exceeds award_max")

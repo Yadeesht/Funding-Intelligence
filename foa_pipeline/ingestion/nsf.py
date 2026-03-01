@@ -54,9 +54,7 @@ class NSFIngestor(BaseIngestor):
             }
         )
 
-    # ------------------------------------------------------------------
     # Public interface
-    # ------------------------------------------------------------------
 
     def search(self, query: str, limit: int = 25) -> List[FOARecord]:
         """Search NSF awards API for opportunities matching a query.
@@ -124,9 +122,7 @@ class NSFIngestor(BaseIngestor):
         self.logger.info("NSF batch ingestion retrieved %d records", len(records))
         return self.validate_records(records)
 
-    # ------------------------------------------------------------------
     # Internals
-    # ------------------------------------------------------------------
 
     def _award_to_record(self, award: dict) -> Optional[FOARecord]:
         """Convert an NSF Awards API result to FOARecord."""
@@ -172,7 +168,6 @@ class NSFIngestor(BaseIngestor):
 
         for link in links:
             href = link["href"]
-            # Match solicitation links (e.g., /funding/opportunities/... or /pubs/...)
             if re.search(r"/funding/opportunities/\w+", href):
                 full_url = (
                     href if href.startswith("http") else f"https://new.nsf.gov{href}"
@@ -204,7 +199,6 @@ class NSFIngestor(BaseIngestor):
             soup = BeautifulSoup(html, "html.parser")
             full_text = soup.get_text(separator="\n", strip=True)
 
-            # Try to extract title from page title or h1
             title = ""
             title_tag = soup.find("h1")
             if title_tag:
@@ -212,16 +206,14 @@ class NSFIngestor(BaseIngestor):
             elif soup.title:
                 title = soup.title.get_text(strip=True)
 
-            # Extract description — look for common NSF section headers
             description = ""
             desc_section = extract_with_regex(
                 r"(?:Synopsis|Program Description|Summary)(.*?)(?:Program Requirements|Eligibility|Award Information|$)",
                 full_text,
             )
             if desc_section:
-                description = desc_section[:5000]  # cap length
+                description = desc_section[:5000]
 
-            # Eligibility
             eligibility = (
                 extract_with_regex(
                     r"Eligibility[:\s]*(.*?)(?:Award Information|Proposal Preparation|Application|$)",
@@ -230,7 +222,6 @@ class NSFIngestor(BaseIngestor):
                 or ""
             )
 
-            # Dates
             open_date_raw = extract_with_regex(
                 r"(?:Posted|Published|Release Date)[:\s]*([A-Za-z]+\s+\d{1,2},?\s+\d{4})",
                 full_text,
@@ -240,7 +231,6 @@ class NSFIngestor(BaseIngestor):
                 full_text,
             )
 
-            # Award amounts
             award_text = extract_with_regex(
                 r"(?:Estimated Number of Awards|Anticipated Funding Amount|Award Range).*?(\$[\d,]+(?:\s*[-–to]+\s*\$[\d,]+)?)",
                 full_text,

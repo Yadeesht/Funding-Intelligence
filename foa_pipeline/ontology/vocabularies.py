@@ -21,10 +21,7 @@ Design principles:
 from typing import Dict, List
 
 
-# ──────────────────────────────────────────────────────────────────────
 # 1. RESEARCH DOMAINS
-# ──────────────────────────────────────────────────────────────────────
-
 RESEARCH_DOMAINS: Dict[str, dict] = {
     "artificial-intelligence": {
         "label": "Artificial Intelligence",
@@ -235,10 +232,7 @@ RESEARCH_DOMAINS: Dict[str, dict] = {
 }
 
 
-# ──────────────────────────────────────────────────────────────────────
 # 2. METHODS / APPROACHES
-# ──────────────────────────────────────────────────────────────────────
-
 METHODS: Dict[str, dict] = {
     "simulation": {
         "label": "Simulation",
@@ -351,10 +345,7 @@ METHODS: Dict[str, dict] = {
 }
 
 
-# ──────────────────────────────────────────────────────────────────────
 # 3. POPULATIONS
-# ──────────────────────────────────────────────────────────────────────
-
 POPULATIONS: Dict[str, dict] = {
     "children-youth": {
         "label": "Children & Youth",
@@ -450,10 +441,7 @@ POPULATIONS: Dict[str, dict] = {
 }
 
 
-# ──────────────────────────────────────────────────────────────────────
 # 4. SPONSOR THEMES (cross-cutting funder priorities)
-# ──────────────────────────────────────────────────────────────────────
-
 SPONSOR_THEMES: Dict[str, dict] = {
     "equity-diversity-inclusion": {
         "label": "Equity, Diversity & Inclusion",
@@ -575,10 +563,7 @@ SPONSOR_THEMES: Dict[str, dict] = {
 }
 
 
-# ──────────────────────────────────────────────────────────────────────
 # Utility functions
-# ──────────────────────────────────────────────────────────────────────
-
 ALL_VOCABULARIES = {
     "research_domains": RESEARCH_DOMAINS,
     "methods": METHODS,
