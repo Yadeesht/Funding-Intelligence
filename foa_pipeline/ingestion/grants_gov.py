@@ -7,6 +7,7 @@ Supports:
   - Batch ingestion of recent posted opportunities
 """
 
+import os
 import re
 import time
 import logging
@@ -28,9 +29,10 @@ from foa_pipeline.extraction.award_parser import parse_award_amount
 
 logger = logging.getLogger(__name__)
 
-# Grants.gov Simpler API endpoints
 SEARCH_API_URL = "https://api.simpler.grants.gov/v1/opportunities/search"
 OPPORTUNITY_PAGE_BASE = "https://simpler.grants.gov/opportunity"
+
+GRANTS_GOV_API_KEY = os.environ.get("GRANTS_GOV_API_KEY", "")
 
 
 class GrantsGovIngestor(BaseIngestor):
@@ -47,12 +49,20 @@ class GrantsGovIngestor(BaseIngestor):
         super().__init__(timeout=timeout)
         self.delay = delay
         self.session = requests.Session()
-        self.session.headers.update(
-            {
-                "User-Agent": "FOA-Pipeline/0.1 (research-tool)",
-                "Accept": "application/json",
-            }
-        )
+        headers: dict = {
+            "User-Agent": "FOA-Pipeline/0.1 (research-tool)",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        api_key = GRANTS_GOV_API_KEY
+        if api_key:
+            headers["X-Api-Key"] = api_key
+        else:
+            self.logger.warning(
+                "GRANTS_GOV_API_KEY not set — API calls may return 401. "
+                "Register at https://simpler.grants.gov/ to get a key."
+            )
+        self.session.headers.update(headers)
 
     # Public interface
     def search(self, query: str, limit: int = 25) -> List[FOARecord]:
@@ -65,8 +75,10 @@ class GrantsGovIngestor(BaseIngestor):
             "pagination": {
                 "page_offset": 1,
                 "page_size": min(limit, 25),
-                "sort_order": "descending",
-                "order_by": "post_date",
+                # sort_order must be a list of sort-descriptor objects
+                "sort_order": [
+                    {"order_by": "post_date", "sort_direction": "descending"}
+                ],
             },
             "query": query,
         }
@@ -77,6 +89,15 @@ class GrantsGovIngestor(BaseIngestor):
             data = resp.json()
         except requests.RequestException as e:
             self.logger.error("Grants.gov search API error: %s", e)
+            return []
+        except ValueError as e:
+            # JSONDecodeError (subclass of ValueError) means the server returned
+            # non-JSON — log the raw body to aid diagnosis
+            self.logger.error(
+                "Grants.gov search: unexpected non-JSON response (%s). Body: %s",
+                e,
+                resp.text[:500] if resp is not None else "<no response>",
+            )
             return []
 
         records = []
@@ -113,12 +134,14 @@ class GrantsGovIngestor(BaseIngestor):
         Performs a broad search sorted by post date descending.
         """
         self.logger.info("Ingesting batch of %d recent Grants.gov FOAs", limit)
-        payload = {
+        # Base payload — page_offset and page_size are updated per iteration
+        payload: dict = {
             "pagination": {
                 "page_offset": 1,
                 "page_size": min(limit, 25),
-                "sort_order": "descending",
-                "order_by": "post_date",
+                "sort_order": [
+                    {"order_by": "post_date", "sort_direction": "descending"}
+                ],
             },
         }
 
@@ -130,6 +153,7 @@ class GrantsGovIngestor(BaseIngestor):
             payload["pagination"]["page_offset"] = page
             payload["pagination"]["page_size"] = min(remaining, 25)
 
+            resp = None
             try:
                 resp = self.session.post(
                     SEARCH_API_URL, json=payload, timeout=self.timeout
@@ -139,12 +163,21 @@ class GrantsGovIngestor(BaseIngestor):
             except requests.RequestException as e:
                 self.logger.error("Batch ingestion API error on page %d: %s", page, e)
                 break
+            except ValueError as e:
+                self.logger.error(
+                    "Batch ingestion: non-JSON response on page %d (%s). Body: %s",
+                    page,
+                    e,
+                    resp.text[:500] if resp is not None else "<no response>",
+                )
+                break
 
             opportunities = data.get("data", [])
             if not opportunities:
                 break
 
             for opp in opportunities:
+                self.logger.debug("Processing batch opportunity: %s", opp)
                 record = self._api_result_to_record(opp)
                 if record:
                     all_records.append(record)
@@ -160,17 +193,24 @@ class GrantsGovIngestor(BaseIngestor):
 
     def _api_result_to_record(self, opp: dict) -> Optional[FOARecord]:
         """Convert an API search result dict into an FOARecord."""
+        # self.logger.debug("Parsing API result: %s", opp)
         try:
             opp_id = opp.get("opportunity_id", "")
             title = opp.get("opportunity_title", "") or opp.get("title", "")
             agency = opp.get("agency_name", "") or opp.get("agency", "")
-            open_date = parse_date_safe(opp.get("post_date"))
-            close_date = parse_date_safe(opp.get("close_date"))
-            description = (
-                opp.get("summary", {}).get("summary_description", "")
-                if isinstance(opp.get("summary"), dict)
-                else opp.get("opportunity_summary", "")
+
+            # All date/award/description fields live inside the nested summary object
+            summary = opp.get("summary") or {}
+            open_date = parse_date_safe(
+                summary.get("post_date") or opp.get("post_date")
             )
+            close_date = parse_date_safe(
+                summary.get("close_date") or opp.get("close_date")
+            )
+            description = clean_text(summary.get("summary_description") or "")
+            award_min = summary.get("award_floor")
+            award_max = summary.get("award_ceiling")
+
             source_url = f"{OPPORTUNITY_PAGE_BASE}/{opp_id}" if opp_id else ""
 
             return FOARecord(
@@ -180,7 +220,9 @@ class GrantsGovIngestor(BaseIngestor):
                 source=self.SOURCE_NAME,
                 open_date=open_date,
                 close_date=close_date,
-                description=clean_text(description),
+                description=description,
+                award_min=award_min,
+                award_max=award_max,
                 source_url=source_url,
             )
         except Exception as e:
@@ -199,7 +241,8 @@ class GrantsGovIngestor(BaseIngestor):
 
             title = extract_with_regex(r"Opportunity Listing - (.*?)\n", full_text)
 
-            agency = extract_with_regex(r"Agency:\s*(.*?)\s{2,}", full_text)
+            # Agency name appears on the line immediately after "Agency:"
+            agency = extract_with_regex(r"Agency:\n(.*?)\n", full_text)
 
             open_date_raw = extract_with_regex(
                 r"Posted date\s*\n\s*:\s*\n\s*([A-Za-z]+\s+\d{1,2},\s+\d{4})",
