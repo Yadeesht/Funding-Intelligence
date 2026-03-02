@@ -15,13 +15,6 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
-# Inject API key from Streamlit secrets into env (for cloud deployment)
-if hasattr(st, "secrets") and "GRANTS_GOV_API_KEY" in st.secrets:
-    os.environ["GRANTS_GOV_API_KEY"] = st.secrets["GRANTS_GOV_API_KEY"]
-else:
-    from dotenv import load_dotenv
-    load_dotenv()
-
 st.set_page_config(
     page_title="Funding Intelligence",
     page_icon="🔬",
@@ -29,7 +22,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-OUTPUT_PATH = Path("output/foa_dataset.json")
+OUTPUT_PATH = Path(__file__).parent / "output" / "foa_dataset.json"
 
 
 @st.cache_data
@@ -273,22 +266,12 @@ def render_tag_chart(filtered: list[dict]):
 
 def main():
     if not OUTPUT_PATH.exists():
-        OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-        with st.spinner("No data found — running initial ingest from NSF (this takes ~30s)..."):
-            try:
-                import sys
-                sys.path.insert(0, str(Path(__file__).parent))
-                from foa_pipeline.ingestion.nsf import NSFIngestor
-                from foa_pipeline.tagging.rule_based import RuleBasedTagger
-                from foa_pipeline.storage.json_export import export_json
-                records_raw = NSFIngestor().ingest_batch(limit=50)
-                records_raw = RuleBasedTagger().tag_batch(records_raw)
-                export_json(records_raw, str(OUTPUT_PATH.parent))
-                st.success(f"Ingested {len(records_raw)} records. Reloading...")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Auto-ingest failed: {e}\n\nRun locally first:\n```\npython run_pipeline.py --source nsf --limit 50 --out_dir ./output\n```")
-                st.stop()
+        st.error(
+            f"No data found at `{OUTPUT_PATH}`. "
+            "Run the pipeline first:\n\n"
+            "```\npython run_pipeline.py --source grants_gov --limit 50 --out_dir ./output\n```"
+        )
+        st.stop()
 
     records = load_data(OUTPUT_PATH)
     filters = render_sidebar(records)
