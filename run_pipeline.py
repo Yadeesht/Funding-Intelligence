@@ -29,6 +29,10 @@ import os
 import sys
 from typing import List
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from foa_pipeline.schema.foa_schema import FOARecord
 from foa_pipeline.ingestion.grants_gov import GrantsGovIngestor
 from foa_pipeline.ingestion.nsf import NSFIngestor
@@ -206,19 +210,20 @@ def ingest_records(args) -> List[FOARecord]:
             batch = ingestor.ingest_batch(limit=args.limit)
 
         records.extend(batch)
-        logging.info("Ingested %d records from %s", len(batch), src)
 
     return records
 
 
 def main():
     args = parse_args()
-    setup_logging(args.verbose)
 
     logger = logging.getLogger("pipeline")
 
+    setup_logging(args.verbose)
+
     # Ingestion
-    logger.info("Starting FOA pipeline...")
+    logger.info("Starting FOA pipeline")
+    logger.info("args: %s", args)
     records = ingest_records(args)
 
     if not records:

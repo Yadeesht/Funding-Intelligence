@@ -177,7 +177,6 @@ class GrantsGovIngestor(BaseIngestor):
                 break
 
             for opp in opportunities:
-                self.logger.debug("Processing batch opportunity: %s", opp)
                 record = self._api_result_to_record(opp)
                 if record:
                     all_records.append(record)
