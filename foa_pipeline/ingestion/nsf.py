@@ -33,8 +33,7 @@ from foa_pipeline.extraction.award_parser import parse_award_amount
 
 logger = logging.getLogger(__name__)
 
-# NSF endpoints
-NSF_OPPORTUNITIES_URL = "https://new.nsf.gov/funding/opportunities"
+# NSF
 NSF_AWARDS_API = "https://api.nsf.gov/services/v1/awards.json"
 
 
@@ -108,19 +107,55 @@ class NSFIngestor(BaseIngestor):
         return self._parse_solicitation_page(resp.text, url)
 
     def ingest_batch(self, limit: int = 50) -> List[FOARecord]:
-        """Ingest recent NSF funding opportunities by scraping the listing page."""
-        self.logger.info("Ingesting batch of %d NSF opportunities", limit)
+        """Ingest recent NSF awards via the public awards API (no key required).
 
-        try:
-            resp = self.session.get(NSF_OPPORTUNITIES_URL, timeout=self.timeout)
-            resp.raise_for_status()
-        except requests.RequestException as e:
-            self.logger.error("Failed to fetch NSF opportunities listing: %s", e)
-            return []
+        Uses a broad recent-awards query sorted by start date descending.
+        The listing page (new.nsf.gov) is JavaScript-rendered and not
+        scrapable with plain HTTP — the API is the reliable path.
+        """
+        self.logger.info("Ingesting batch of %d NSF awards via API", limit)
 
-        records = self._parse_listing_page(resp.text, limit)
-        self.logger.info("NSF batch ingestion retrieved %d records", len(records))
-        return self.validate_records(records)
+        all_records: List[FOARecord] = []
+        offset = 1
+        page_size = min(limit, 25)
+
+        while len(all_records) < limit:
+            params = {
+                "printFields": "id,title,agency,startDate,expDate,abstractText,fundsObligatedAmt",
+                "offset": offset,
+                "rpp": page_size,
+            }
+            try:
+                resp = self.session.get(
+                    NSF_AWARDS_API, params=params, timeout=self.timeout
+                )
+                resp.raise_for_status()
+                data = resp.json()
+            except requests.RequestException as e:
+                self.logger.error("NSF Awards API error on offset %d: %s", offset, e)
+                break
+            except ValueError as e:
+                self.logger.error(
+                    "NSF Awards API non-JSON response at offset %d: %s", offset, e
+                )
+                break
+
+            awards = data.get("response", {}).get("award", [])
+            if not awards:
+                break
+
+            for award in awards:
+                record = self._award_to_record(award)
+                if record:
+                    all_records.append(record)
+                    if len(all_records) >= limit:
+                        break
+
+            offset += page_size
+            time.sleep(self.delay)
+
+        self.logger.info("NSF batch ingestion retrieved %d records", len(all_records))
+        return self.validate_records(all_records)
 
     # Internals
 
