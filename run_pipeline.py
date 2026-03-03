@@ -20,6 +20,12 @@ Usage:
     # Merge new results into existing export
     python run_pipeline.py --source grants_gov --limit 20 --out_dir ./output --merge
 
+    # Run evaluation
+    python run_pipeline.py --evaluate
+
+    # Run evaluation with embedding tagger
+    python run_pipeline.py --evaluate --tagger embedding --threshold 0.3
+
 """
 
 import argparse
@@ -100,6 +106,12 @@ def parse_args():
         help="Embedding similarity threshold (default: 0.35).",
     )
 
+    source_group.add_argument(
+        "--evaluate",
+        action="store_true",
+        help="Run tagging evaluation against gold dataset.",
+    )
+
     # Output
     parser.add_argument(
         "--out_dir",
@@ -122,6 +134,17 @@ def parse_args():
     )
 
     return parser.parse_args()
+
+
+def run_evaluation(args):
+    """Run tagging evaluation."""
+    from foa_pipeline.evaluation.evaluate import evaluate_tagging
+
+    report = evaluate_tagging(
+        tagger_type=args.tagger,
+        embedding_threshold=args.threshold,
+    )
+    print(report.summary())
 
 
 def get_tagger(tagger_type: str, threshold: float = 0.35):
@@ -220,6 +243,10 @@ def main():
     logger = logging.getLogger("pipeline")
 
     setup_logging(args.verbose)
+
+    if args.evaluate:
+        run_evaluation(args)
+        return
 
     # Ingestion
     logger.info("Starting FOA pipeline")
